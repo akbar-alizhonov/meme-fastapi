@@ -2,13 +2,14 @@ from fastapi import APIRouter
 from typing import Annotated
 from http import HTTPStatus
 
-from fastapi import Depends, HTTPException, File
+from fastapi import Depends, HTTPException
 from fastapi.responses import Response
+from fastapi_pagination import paginate, Page
 from sqlalchemy.orm import Session
 
 from db.database import SessionLocal, engine
 from db import models
-from .schemas import SMeme
+from .schemas import SMeme, SMemeReturn
 from storage_service.store import client
 
 
@@ -43,21 +44,12 @@ def get_object_or_404(
 
 
 @router.get('/')
-async def get_memes(db: Session = Depends(get_db)):
+async def get_memes(
+    db: Session = Depends(get_db),
+) -> Page[SMemeReturn]:
     memes = db.query(models.Meme).all()
-    result = []
 
-    for meme in memes:
-        image = client.get_image(meme.image)
-        result.append(
-            {
-                'id': meme.id,
-                'description': meme.description,
-                'image': File(image)
-            }
-        )
-
-    return result
+    return paginate(memes)
 
 
 @router.post('/')
