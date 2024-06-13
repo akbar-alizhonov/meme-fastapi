@@ -12,23 +12,28 @@ services:
       - '9000:9000'
       - '9001:9001'
     env_file:
-      - minio.env
+      - .env
     networks:
       - app-tier
 
   meme_fastapi:
     container_name: meme_fastapi
-    image: context .
+    build: context .
     networks:
       - app-tier
     env_file:
-      - minio.env
+      - .env
+    ports:
+      - 9999:8000
+    depends_on:
+      - db
+      - minio
 
-  db_app:
+  db:
     image: postgres:16
     container_name: db_app
     command: -p 5435
     expose:
       - 5435
     env_file:
-      - postgres.env
+      - .env
