@@ -30,9 +30,6 @@ docker-compose up -d --build
 ```
 
 ## Запуск Тестов
-```shell
-docker-compose up -d --build
-```
 ### Выполните команды
 ```shell
 cd tests
