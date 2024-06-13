@@ -1,39 +1,23 @@
 version: '3'
 
-networks:
-  app-tier:
-    driver: bridge
-
 services:
-  minio:
-    image: 'bitnami/minio:latest'
-    container_name: minio
-    ports:
-      - '9000:9000'
-      - '9001:9001'
-    env_file:
-      - .env
-    networks:
-      - app-tier
-
   meme_fastapi:
     container_name: meme_fastapi
-    build: context .
-    networks:
-      - app-tier
+    build: 
+      context: .
     env_file:
       - .env
     ports:
       - 9999:8000
     depends_on:
       - db
-      - minio
 
   db:
     image: postgres:16
     container_name: db_app
-    command: -p 5435
-    expose:
-      - 5435
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DATABASE=${POSTGRES_DATABASE}
     env_file:
       - .env
