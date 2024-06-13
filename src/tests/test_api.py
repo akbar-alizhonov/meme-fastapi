@@ -7,23 +7,29 @@ from http import HTTPStatus
 from db.database import Base
 from meme.main import app
 from meme.router import get_db
+from decouple import config
 
 
-SQLALCHEMY_DATABASE_URL = "sqlite://"
+DB_HOST = config('DB_TEST_HOST')
+DB_PORT = config('DB_TEST_PORT')
+DB_USER = config('POSTGRES_TEST_USER')
+DB_PASSWORD = config('POSTGRES_TEST_PASSWORD')
+DB_NAME = config('POSTGRES_TEST_DB')
+
+SQLACHEMY_DATABASE_URL = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
+    SQLACHEMY_DATABASE_URL,
     poolclass=StaticPool,
 )
+
 TestingSessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
-    bind=engine
+    bind=engine,
+    expire_on_commit=False
 )
-
-
-Base.metadata.create_all(bind=engine)
 
 
 def override_get_db():
@@ -39,9 +45,9 @@ app.dependency_overrides[get_db] = override_get_db
 client = TestClient(app)
 
 
-def test_read_memes():
-    response = client.get('/memes')
-    assert response.json() == []
+def test_create_db() -> None:
+    # Create the tables in the test database
+    Base.metadata.create_all(bind=engine)
 
 
 def test_add_new_mem():
@@ -70,6 +76,12 @@ def test_add_new_mem():
 
     assert response.status_code == HTTPStatus.OK
     assert response.headers['description'] == params['description']
+
+
+def test_read_memes():
+    response = client.get('/memes')
+    items = response.json()['items']
+    assert len(items) == 1
 
 
 def test_put_meme():
@@ -108,11 +120,6 @@ def test_delete_meme():
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
-def setup() -> None:
-    # Create the tables in the test database
-    Base.metadata.create_all(bind=engine)
-
-
-def teardown() -> None:
+def test_delete_db() -> None:
     # Drop the tables in the test database
     Base.metadata.drop_all(bind=engine)

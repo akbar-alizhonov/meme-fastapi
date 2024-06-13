@@ -74,10 +74,10 @@ class S3Client:
         return object_name
 
 
-endpoint = config('ENDPOINT')
-access_key = config('ACCESS_KEY')
-secret_key = config('SECRET_KEY')
-bucket_name = config('BUCKET_NAME')
+endpoint = config('MINIO_ENDPOINT')
+access_key = config('MINIO_ACCESS_KEY')
+secret_key = config('MINIO_SECRET_KEY')
+bucket_name = config('MINIO_BUCKET_NAME')
 
 client = S3Client(
             endpoint=endpoint,
