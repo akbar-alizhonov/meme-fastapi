@@ -27,7 +27,7 @@ fastapi dev meme/main.py
 ## Запуск с Docker
 ### Скопируйте настройки для прода и измените значения переменных окружений под себя
 ```shell
-cp .env.template-dev .env
+cp .env.template-prod .env
 docker-compose up -d --build
 ```
 
